@@ -28,14 +28,11 @@
 #include "R3BDecaysBuilder.h"
 
 
-//#include "EmHadronElasticBuilder.h"
-//#include "EmBinaryCascadeBuilder.h"
-//#include "EmIonBinaryCascadeBuilder.h"
-//#include "EmGammaNucleusBuilder.h"
 #include "G4HadronElasticPhysics.hh"
 #include "G4IonBinaryCascadePhysics.hh"
 #include "G4EmExtraPhysics.hh"
 
+#include "G4HadronPhysicsINCLXX.hh"
 #include "G4IonINCLXXPhysics.hh"
 #include "G4HadronPhysicsQGSP_BERT.hh"
 
@@ -57,6 +54,7 @@ R3BPhysicsList::R3BPhysicsList():  G4VModularPhysicsList(){
   stepLimiterIsRegisted = false;
   helIsRegisted = false;
   bicIsRegisted = false;
+  hadronIsRegistered = false;
   ionIsRegisted = false;
   gnucIsRegisted = false;
   verbose = 0;
@@ -190,13 +188,16 @@ void R3BPhysicsList::AddPhysicsList(const G4String& name){
     gnucIsRegisted = true;
     G4cout << "R3BPhysicsList::AddPhysicsList <" << name << ">" << G4endl;
 
-  } else if (name == "qgsp_bert") {
+  } else if (name == "qgsp_bert" && !hadronIsRegistered) {
     RegisterPhysics(new G4HadronPhysicsQGSP_BERT());
+    //hadronIsRegistered = true;
     G4cout << "R3BPhysicsList::AddPhysicsList <" << name << ">" << G4endl;
     
-  } else if (name == "ion_inclxx" && !ionIsRegisted) {
+  } else if (name == "inclxx" && !ionIsRegisted && !hadronIsRegistered) {
     RegisterPhysics(new G4IonINCLXXPhysics());
+    RegisterPhysics(new G4HadronPhysicsINCLXX());
     ionIsRegisted = true;
+    //hadronIsRegistered = true;
     G4cout << "R3BPhysicsList::AddPhysicsList <" << name << ">" << G4endl;
 
   } else {

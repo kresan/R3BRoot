@@ -35,6 +35,7 @@ private:
   G4bool   stepLimiterIsRegisted;
   G4bool   helIsRegisted;
   G4bool   bicIsRegisted;
+  G4bool   hadronIsRegistered;
   G4bool   ionIsRegisted;
   G4bool   gnucIsRegisted;
   
