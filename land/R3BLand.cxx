@@ -605,11 +605,11 @@ void R3BLand::StepHistory()
             //        printf("-I- Process involved --->   code: %i : name: %s\n", proc.At(i) ,
             //        TMCProcessName[proc.At(i)]);
 
-            if (proc.At(i) != 22 && proc.At(i) != 23 && proc.At(i) != 31 && proc.At(i) != 43 && proc.At(i) != 13)
-            {
-                LOG(INFO) << "new primary neutron interaction: " << proc.At(i) << "  " << TMCProcessName[proc.At(i)]
-                          << FairLogger::endl;
-            }
+            //if (proc.At(i) != 22 && proc.At(i) != 23 && proc.At(i) != 31 && proc.At(i) != 43 && proc.At(i) != 13)
+            //{
+            //    LOG(INFO) << "new primary neutron interaction: " << proc.At(i) << "  " << TMCProcessName[proc.At(i)]
+            //              << FairLogger::endl;
+            //}
 
             // make histogram with first interaction
 
