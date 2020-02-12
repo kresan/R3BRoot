@@ -34,6 +34,8 @@ class R3BFi4Digitizer : public FairTask
     /** Default constructor **/
     R3BFi4Digitizer();
 
+    R3BFi4Digitizer(const char* name);
+
     R3BFi4Digitizer(Double_t esigma, Double_t tsigma, Double_t ysigma);
 
     /** Destructor **/

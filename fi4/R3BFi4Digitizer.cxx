@@ -61,6 +61,17 @@ R3BFi4Digitizer::R3BFi4Digitizer()
     ysigma = 1;
 }
 
+R3BFi4Digitizer::R3BFi4Digitizer(const char* name)
+    : FairTask(name)
+    , fFi4Points(NULL)
+    , fFi6Points(NULL)
+    , fFi5Points(NULL)
+{
+    esigma = 0.001;
+    tsigma = 0.01;
+    ysigma = 1;
+}
+
 R3BFi4Digitizer::R3BFi4Digitizer(Double_t e, Double_t t, Double_t y)
     : FairTask("R3B Fi4 Digitization scheme ")
     , fFi4Points(NULL)

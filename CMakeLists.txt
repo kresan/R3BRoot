@@ -93,6 +93,8 @@ find_package2(PUBLIC FairLogger  VERSION 1.2.0 REQUIRED)
 find_package2(PUBLIC Pythia6)
 find_package2(PUBLIC Pythia8)
 
+find_package2(PUBLIC FairMQ VERSION 1.2.3)
+
 find_package2(PUBLIC Geant3)
 if(Geant3_FOUND)
   Set(Geant3_LIBRARY_DIR ${Geant3_DIR}/${Geant3_CMAKE_INSTALL_LIBDIR})
@@ -167,11 +169,13 @@ EndIf(${ROOT_LIBRARY_DIR} MATCHES /lib/root)
 
 unset(Boost_INCLUDE_DIR CACHE)
 unset(Boost_LIBRARY_DIRS CACHE)
+
 find_package2(PUBLIC Boost
-  VERSION 1.67 ${FairMQ_Boost_VERSION}
-  COMPONENTS thread system timer program_options random filesystem chrono exception 
-regex serialization log log_setup atomic date_time signals ${FairMQ_Boost_COMPONENTS}
+  VERSION 1.67
+  COMPONENTS thread system timer program_options random filesystem chrono exception regex serialization log log_setup atomic date_time signals
+  ADD_REQUIREMENTS_OF FairMQ
 )
+
 if(Boost_FOUND)
     set(Boost_Avail 1)
 else(Boost_FOUND)
@@ -311,6 +315,11 @@ if(NOT MODULE)
     add_subdirectory(tcal)
     add_subdirectory(tracking)
     add_subdirectory(tracker_rene)
+
+    if(${FairMQ_FOUND})
+        add_subdirectory(mq)
+    endif(${FairMQ_FOUND})
+
     if(GARFIELD_FOUND)
         add_subdirectory(actar)
         set(LD_LIBRARY_PATH ${GARFIELD_LIBRARY_DIR} ${LD_LIBRARY_PATH})
