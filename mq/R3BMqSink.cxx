@@ -5,46 +5,35 @@
 #include <FairRunAna.h>
 #include <FairRootManager.h>
 #include <FairLogger.h>
+#include <FairRootFileSink.h>
 
-#include "R3BMqDevice.h"
+#include "R3BMqSink.h"
 
 #include <RootSerializer.h>
 
 #include <R3BFi4Digitizer.h>
 #include <R3BFragmentTracker.h>
 
-R3BMqDevice::R3BMqDevice()
+R3BMqSink::R3BMqSink()
 {
-    InitTaskMap();
 }
 
-R3BMqDevice::~R3BMqDevice()
+R3BMqSink::~R3BMqSink()
 {
-    if(fTask)
-    {
-        delete fTask;
-    }
 }
 
-void R3BMqDevice::InitTask()
+void R3BMqSink::InitTask()
 {
-    OnData("data1", &R3BMqDevice::ReceiveData);
+    OnData("data2", &R3BMqSink::ReceiveData);
+    
+    std::string fileName = GetConfig()->GetValue<std::string>("file");
     
     FairRunAna* run = new FairRunAna();
+    run->SetSink(new FairRootFileSink(fileName.c_str()));
     
     fMgr = FairRootManager::Instance();
     
-    std::string taskName = GetConfig()->GetValue<std::string>("task");
-    if(fTaskMap.find(taskName) != fTaskMap.end())
-    {
-        LOG(info) << "Creating task " << taskName;
-        fTask = fTaskMap[taskName](taskName.c_str());
-    }
-    else
-    {
-        fTask = nullptr;
-        // TODO Throw error
-    }
+    fMgr->InitSink();
     
     fRequireAllBranches = GetConfig()->GetValue<bool>("all");
     fInputBranches = GetConfig()->GetValue<std::vector<std::string>>("branch");
@@ -62,35 +51,26 @@ void R3BMqDevice::InitTask()
         << " " << fInputClasses.at(i);
         auto array = new TClonesArray(fInputClasses.at(i).c_str());
         fInputArrays.push_back(array);
-        //fMgr->Register(x.c_str(), fInputFolders.at(i).c_str(), array, kFALSE);
-        fMgr->RegisterInputObject(x.c_str(), array);
+        fMgr->Register(x.c_str(), fInputFolders.at(i).c_str(), array, kTRUE);
         fHasData[fInputClasses.at(i)] = false;
         i++;
     }
-
-    fTask->InitTask();
-
-    fOutputBranches = GetConfig()->GetValue<std::vector<std::string>>("output");
-    for(auto & x : fOutputBranches)
-    {
-        TClonesArray* array = static_cast<TClonesArray*>(fMgr->GetObject(x.c_str()));
-        if(! array)
-        {
-            // TODO Throw error
-        }
-        fOutputArrays.push_back(array);
-    }
+    
+    fMgr->WriteFolder();
 }
 
-void R3BMqDevice::PreRun()
+void R3BMqSink::PreRun()
 {
 }
 
-void R3BMqDevice::PostRun()
+void R3BMqSink::PostRun()
 {
+    fMgr->LastFill();
+    fMgr->Write();
+    fMgr->CloseSink();
 }
 
-bool R3BMqDevice::ReceiveData(FairMQMessagePtr& msg, int index)
+bool R3BMqSink::ReceiveData(FairMQMessagePtr& msg, int index)
 {
     TObject* tempObject = nullptr;
     Deserialize<RootSerializer>(*msg, tempObject);
@@ -111,10 +91,8 @@ bool R3BMqDevice::ReceiveData(FairMQMessagePtr& msg, int index)
         
         if(fRequireAllBranches && CheckIfAllInput())
         {
-            // All arrays are there - execute
-            fTask->Exec("");
-            
-            SendOutputData();
+            // All arrays are there - fill
+            FillData();
             
             // Reset flags
             for(auto & x : fInputClasses)
@@ -125,9 +103,7 @@ bool R3BMqDevice::ReceiveData(FairMQMessagePtr& msg, int index)
         else
         {
             // Execute even for partial data
-            fTask->Exec("");
-            
-            SendOutputData();
+            FillData();
         }
         
         input->Delete();
@@ -138,7 +114,7 @@ bool R3BMqDevice::ReceiveData(FairMQMessagePtr& msg, int index)
     return true;
 }
 
-bool R3BMqDevice::CheckIfAllInput()
+bool R3BMqSink::CheckIfAllInput()
 {
     // Check if all arrays arrived
     for(auto & x : fHasData)
@@ -151,19 +127,7 @@ bool R3BMqDevice::CheckIfAllInput()
     return true;
 }
 
-void R3BMqDevice::SendOutputData()
+void R3BMqSink::FillData()
 {
-    for(auto & x : fOutputArrays)
-    {
-        FairMQMessagePtr message(NewMessage());
-        Serialize<RootSerializer>(*message, x);
-        
-        Send(message, "data2");
-    }
-}
-
-void R3BMqDevice::InitTaskMap()
-{
-    // Fill the map of known tasks
-    fTaskMap["Fi4Digitizer"] = &CreateTask<R3BFi4Digitizer>;
+    fMgr->Fill();
 }

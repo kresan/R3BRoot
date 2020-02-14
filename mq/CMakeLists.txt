@@ -45,6 +45,8 @@ set(SRCS
 
 set(NO_DICT_SRCS
     R3BMqDevice.cxx
+    R3BMqSampler.cxx
+    R3BMqSink.cxx
 )
 
 #Set(LINKDEF TCalLinkDef.h)
@@ -60,10 +62,14 @@ Set(DEPENDENCIES
 GENERATE_LIBRARY()
 
 Set(Exe_Names
-    runR3BDevice)
+    runR3BDevice
+    runR3BSampler
+    runR3BSink)
 
 Set(Exe_Source
-    runR3BDevice.cxx)
+    runR3BDevice.cxx
+    runR3BSampler.cxx
+    runR3BSink.cxx)
 
 list(LENGTH Exe_Names _length)
 math(EXPR _length ${_length}-1)

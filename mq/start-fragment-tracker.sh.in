@@ -1,32 +1,25 @@
 #!/bin/bash
 
+DEVICE="runR3BSampler"
+DEVICE+=" --id sampler"
+DEVICE+=" --channel-config name=data1,type=push,method=bind,address=tcp://localhost:5555,rateLogging=0"
+DEVICE+=" --file /Users/kresan/SSD2/R3BRoot/github/R3BRoot/macros/r3b/tracking/sim.root --branch MCTrack FI4Point Fi6Point Fi5Point"
+xterm -geometry 80x23+0+0 -hold -e "source @MAIN_BINARY_DIR@/config.sh &&\
+@EX_BIN_DIR@/$DEVICE" &
+
 DEVICE="runR3BDevice"
 DEVICE+=" --id fibdigi"
-DEVICE+=" --channel-config name=data1,type=pub,method=connect,address=tcp://localhost:5555,rateLogging=0"
+DEVICE+=" --channel-config name=data1,type=pull,method=connect,address=tcp://localhost:5555,rateLogging=0"
+DEVICE+=" --channel-config name=data2,type=push,method=connect,address=tcp://localhost:5556,rateLogging=0"
 DEVICE+=" --task Fi4Digitizer --all true --branch MCTrack FI4Point Fi6Point Fi5Point --folder Stack Fi4 Fi6 Fi5 --class R3BMCTrack R3BFi4Point R3BFibPoint R3BFibPoint --output Fi4Hit Fi6Hit Fi5Hit"
 xterm -geometry 80x23+0+0 -hold -e "source @MAIN_BINARY_DIR@/config.sh &&\
 @EX_BIN_DIR@/$DEVICE" &
 
-#DEVICE="ex-histo-device"
-#DEVICE+=" --id device2"
-#DEVICE+=" --channel-config name=histogram-in,type=pub,method=connect,address=tcp://localhost:5555,rateLogging=0"
-#xterm -geometry 80x23+0+0 -hold -e "source @MAIN_BINARY_DIR@/config.sh &&\
-#@EX_BIN_DIR@/$DEVICE" &
+DEVICE="runR3BSink"
 
-#DEVICE="ex-histo-device"
-#DEVICE+=" --id device3"
-#DEVICE+=" --channel-config name=histogram-in,type=pub,method=connect,address=tcp://localhost:5555,rateLogging=0"
-#xterm -geometry 80x23+0+0 -hold -e "source @MAIN_BINARY_DIR@/config.sh &&\
-#@EX_BIN_DIR@/$DEVICE" &
+DEVICE+=" --id sink"
+DEVICE+=" --channel-config name=data2,type=pull,method=bind,address=tcp://localhost:5556,rateLogging=0"
+DEVICE+=" --file /Users/kresan/SSD2/R3BRoot/github/R3BRoot/macros/r3b/tracking/fib.root --all true --branch Fi4Hit Fi6Hit Fi5Hit --folder Fi4 Fi6 Fi5 --class R3BFi4HitItem R3BFi4HitItem R3BFi4HitItem"
+xterm -geometry 80x23+0+0 -hold -e "source @MAIN_BINARY_DIR@/config.sh &&\
+@EX_BIN_DIR@/$DEVICE" &
 
-#DEVICE="ex-histo-device"
-#DEVICE+=" --id device4"
-#DEVICE+=" --channel-config name=histogram-in,type=pub,method=connect,address=tcp://localhost:5555,rateLogging=0"
-#xterm -geometry 80x23+0+0 -hold -e "source @MAIN_BINARY_DIR@/config.sh &&\
-#@EX_BIN_DIR@/$DEVICE" &
-
-#SERVER="ex-histo-server"
-#SERVER+=" --id server1"
-#SERVER+=" --channel-config name=histogram-in,type=sub,method=bind,address=tcp://localhost:5555,rateLogging=0"
-#xterm -geometry 80x23+500+0 -hold -e "source @MAIN_BINARY_DIR@/config.sh &&\
-#@EX_BIN_DIR@/$SERVER" &
