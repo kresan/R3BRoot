@@ -69,6 +69,7 @@ include(CheckCXX11Features)
 
 # Load some basic macros which are needed later on
 include(FairMacros)
+include(FairRootTargetRootDictionary)
 include(R3BMacros)
 include(WriteConfigFile_r3b)
 include(Dart)
@@ -88,6 +89,8 @@ endif()
 if(SIMPATH)
   set(CMAKE_PREFIX_PATH ${SIMPATH} ${CMAKE_PREFIX_PATH})
 endif()
+
+set(CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_PREFIX}/lib)
 
 find_package2(PUBLIC ROOT  VERSION 6.10.00  REQUIRED)
 find_package2(PUBLIC FairLogger  VERSION 1.2.0 REQUIRED)

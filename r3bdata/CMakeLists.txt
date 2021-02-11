@@ -135,7 +135,7 @@ fair_change_extensions_if_exists(.cxx .h FILES "${sources}" OUTVAR headers)
 
 add_library(${target} SHARED ${sources} ${headers})
 add_library(R3BRoot::${target} ALIAS ${target})
-set_target_properties(${target} PROPERTIES ${PROJECT_LIBRARY_PROPERTIES})
+set_target_properties(${target} PROPERTIES ${FAIRROOT_LIBRARY_PROPERTIES})
 
 target_include_directories(${target} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/xballData>
@@ -181,5 +181,5 @@ fairroot_target_root_dictionary(${target}
   LINKDEF R3BDataLinkDef.h
 )
 
-install(TARGETS ${target} LIBRARY DESTINATION ${PROJECT_INSTALL_LIBDIR})
-install(FILES ${headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+#install(TARGETS ${target} LIBRARY DESTINATION ${PROJECT_INSTALL_LIBDIR})
+#install(FILES ${headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
