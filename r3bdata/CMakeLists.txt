@@ -17,49 +17,9 @@
 # Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-overloaded-virtual") Set(CMAKE_CXX_FLAGS
 # "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wformat-security -march=native")
 
-set(SYSTEM_INCLUDE_DIRECTORIES ${SYSTEM_INCLUDE_DIRECTORIES} ${BASE_INCLUDE_DIRECTORIES})
+set(target R3BData)
 
-set(INCLUDE_DIRECTORIES
-${R3BROOT_SOURCE_DIR}/r3bdata
-${R3BROOT_SOURCE_DIR}/r3bdata/xballData
-${R3BROOT_SOURCE_DIR}/r3bdata/califaData
-${R3BROOT_SOURCE_DIR}/r3bdata/wrData
-${R3BROOT_SOURCE_DIR}/r3bdata/beammonitorData
-${R3BROOT_SOURCE_DIR}/r3bdata/dhcData
-${R3BROOT_SOURCE_DIR}/r3bdata/gfiData
-${R3BROOT_SOURCE_DIR}/r3bdata/mtofData
-${R3BROOT_SOURCE_DIR}/r3bdata/tofData
-${R3BROOT_SOURCE_DIR}/r3bdata/pdcData
-${R3BROOT_SOURCE_DIR}/r3bdata/vetoData
-${R3BROOT_SOURCE_DIR}/r3bdata/lumonData
-${R3BROOT_SOURCE_DIR}/r3bdata/trackerData
-${R3BROOT_SOURCE_DIR}/r3bdata/startrackData
-${R3BROOT_SOURCE_DIR}/r3bdata/landData
-${R3BROOT_SOURCE_DIR}/r3bdata/roluData
-${R3BROOT_SOURCE_DIR}/r3bdata/losData
-${R3BROOT_SOURCE_DIR}/r3bdata/sci2Data
-${R3BROOT_SOURCE_DIR}/r3bdata/sci8Data
-${R3BROOT_SOURCE_DIR}/r3bdata/mfiData
-${R3BROOT_SOURCE_DIR}/r3bdata/fibData
-${R3BROOT_SOURCE_DIR}/r3bdata/pspData
-${R3BROOT_SOURCE_DIR}/r3bdata/neulandData
-${R3BROOT_SOURCE_DIR}/r3bdata/actarData
-${R3BROOT_SOURCE_DIR}/r3bdata/strawtubesData
-${R3BROOT_SOURCE_DIR}/r3bdata/amsData
-${R3BROOT_SOURCE_DIR}/r3bdata/sci2Data
-${R3BROOT_SOURCE_DIR}/r3bdata/sci8Data
-${R3BROOT_SOURCE_DIR}/r3bdata/musicData
-${R3BROOT_SOURCE_DIR}/r3bdata/sampData
-)
-
-include_directories(${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES ${ROOT_LIBRARY_DIR} ${FAIRROOT_LIBRARY_DIR})
-
-link_directories(${LINK_DIRECTORIES})
-
-set(SRCS
+set(sources
 R3BMCStack.cxx
 R3BMCTrack.cxx
 wrData/R3BWRMasterData.cxx
@@ -171,12 +131,55 @@ musicData/R3BMusicHitData.cxx
 sampData/R3BSamplerMappedData.cxx
 )
 
-# fill list of header files from list of source files by exchanging the file extension
-change_file_extension(*.cxx *.h HEADERS "${SRCS}")
-set(HEADERS ${HEADERS} R3BDetectorList.h)
+fair_change_extensions_if_exists(.cxx .h FILES "${sources}" OUTVAR headers)
 
-set(LINKDEF R3BDataLinkDef.h)
-set(LIBRARY_NAME R3BData)
-set(DEPENDENCIES Base FairTools)
+add_library(${target} SHARED ${sources} ${headers})
+add_library(R3BRoot::${target} ALIAS ${target})
+set_target_properties(${target} PROPERTIES ${PROJECT_LIBRARY_PROPERTIES})
 
-generate_library()
+target_include_directories(${target} PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/xballData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/califaData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/wrData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/beammonitorData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/gfiData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/mtofData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tofData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pdcData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vetoData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lumonData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/trackerData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/startrackData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/landData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/roluData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/losData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/sci2Data>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/sci8Data>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/mfiData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/fibData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pspData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/neulandData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/actarData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strawtubesData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/amsData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/musicData>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/sampData>
+    
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+
+  # DELETE ME ONCE USING root targets
+  ${ROOT_INCLUDE_DIR}
+)
+
+target_link_libraries(${target} PUBLIC
+  FairRoot::Base
+  FairRoot::FairTools
+)
+
+fairroot_target_root_dictionary(${target}
+  HEADERS ${headers}
+  LINKDEF R3BDataLinkDef.h
+)
+
+install(TARGETS ${target} LIBRARY DESTINATION ${PROJECT_INSTALL_LIBDIR})
+install(FILES ${headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
